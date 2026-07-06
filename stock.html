@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Manager</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+body{
+    background:#f5f7fb;
+    padding:30px;
+}
+
+.card{
+    border:none;
+    border-radius:15px;
+    box-shadow:0 3px 15px rgba(0,0,0,.08);
+}
+
+.action-btn{
+    width:35px;
+    height:35px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-wallet2 me-2"></i>
+            Portfolio Manager
+        </h2>
+
+        <button class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#stockModal">
+            <i class="bi bi-plus-circle me-2"></i>
+            Add Stock
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Company</th>
+                            <th>Quantity</th>
+                            <th>Buy Price</th>
+                            <th>Investment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="portfolioTable">
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="stockModal" tabindex="-1">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Add / Edit Stock
+                </h5>
+
+                <button class="btn-close"
+                        data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="form-label">Stock Symbol</label>
+                    <input type="text" id="symbol" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Company Name</label>
+                    <input type="text" id="company" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Quantity</label>
+                    <input type="number" id="quantity" class="form-control">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Buy Price</label>
+                    <input type="number" id="price" class="form-control">
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-success"
+                        onclick="saveStock()">
+                    Save Stock
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+let editRowIndex = null;
+
+function saveStock(){
+
+    let symbol = document.getElementById("symbol").value;
+    let company = document.getElementById("company").value;
+    let quantity = document.getElementById("quantity").value;
+    let price = document.getElementById("price").value;
+
+    if(symbol === "" || company === "" ||
+       quantity === "" || price === ""){
+        alert("Please fill all fields");
+        return;
+    }
+
+    let investment = quantity * price;
+
+    if(editRowIndex === null){
+
+        let row = `
+        <tr>
+            <td>${symbol}</td>
+            <td>${company}</td>
+            <td>${quantity}</td>
+            <td>₹${price}</td>
+            <td>₹${investment}</td>
+
+            <td>
+                <div class="d-flex gap-2">
+
+                    <button class="btn btn-warning btn-sm action-btn"
+                            onclick="editStock(this)">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+
+                    <button class="btn btn-danger btn-sm action-btn"
+                            onclick="deleteStock(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+
+                </div>
+            </td>
+        </tr>
+        `;
+
+        document.getElementById("portfolioTable")
+                .insertAdjacentHTML("beforeend", row);
+
+    } else {
+
+        let row = editRowIndex;
+
+        row.cells[0].innerText = symbol;
+        row.cells[1].innerText = company;
+        row.cells[2].innerText = quantity;
+        row.cells[3].innerText = "₹" + price;
+        row.cells[4].innerText = "₹" + investment;
+
+        editRowIndex = null;
+    }
+
+    clearForm();
+
+    bootstrap.Modal
+        .getInstance(document.getElementById("stockModal"))
+        .hide();
+}
+
+function editStock(button){
+
+    let row = button.closest("tr");
+
+    document.getElementById("symbol").value =
+        row.cells[0].innerText;
+
+    document.getElementById("company").value =
+        row.cells[1].innerText;
+
+    document.getElementById("quantity").value =
+        row.cells[2].innerText;
+
+    document.getElementById("price").value =
+        row.cells[3].innerText.replace("₹","");
+
+    editRowIndex = row;
+
+    let modal = new bootstrap.Modal(
+        document.getElementById("stockModal")
+    );
+
+    modal.show();
+}
+
+function deleteStock(button){
+
+    if(confirm("Delete this stock?")){
+
+        button.closest("tr").remove();
+
+    }
+}
+
+function clearForm(){
+
+    document.getElementById("symbol").value = "";
+    document.getElementById("company").value = "";
+    document.getElementById("quantity").value = "";
+    document.getElementById("price").value = "";
+}
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
